@@ -74,8 +74,8 @@ class Paddle(Brick):
 
     # constructor
     def __init__(self, size):
-        super().__init__(int(size // 2) - 50, size - 40, (255, 255, 255))
-        self.dimensions = [100, 20]
+        super().__init__(int(size // 2) - 20, size - 40, (255, 255, 255))
+        self.dimensions = [40, 20]
         self.velocity = 0
         self.window_size = size
 
@@ -85,7 +85,7 @@ class Paddle(Brick):
                 self.position[0] + self.dimensions[0] > self.window_size and self.velocity > 0):
             pass
         else:
-            self.position[0] += self.velocity * 20
+            self.position[0] += self.velocity * 1.5
 
 
 class Ball:
@@ -96,7 +96,7 @@ class Ball:
         self.position = [int(size // 2), 5 * self.radius]
         self.velocity = [0, 0]
         self.maximum_velocity = 0
-        self.gravity = 0.8
+        self.gravity = 0.018
         self.screen_size = size
         self.score = False
 
@@ -117,7 +117,7 @@ class Ball:
 
     # drift function to randomly manipulate the ball's x-velocity component
     def drift(self):
-        self.velocity[0] = random.randint(-10, 10)
+        self.velocity[0] = random.randint(-10, 10) / 6
 
     # detect_collision function
     # params (Brick): the surface parameter holds a Brick (or sub-Brick) object
@@ -213,7 +213,7 @@ while True:
 
         if len(bricks) == 0:
             if level < len(colors):
-                pad.dimensions[0] += 10
+                # pad.dimensions[0] += 10
                 level += 1
                 bricks = [Brick(x % 8 * 90, x // 8 * 55 + 20, colors[x // 8]) for x in range(8 * level)]
 
@@ -257,5 +257,5 @@ while True:
                 home_button.active = False
                 play = False
 
-    clock.tick(25)  # frame-rate set to 25 fps
+    clock.tick(160)  # frame-rate set to 40 fps
     pygame.display.update()  # graphics update
