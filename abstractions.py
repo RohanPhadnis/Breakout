@@ -73,6 +73,7 @@ class Model:
                 l.append(layer.mod_copy(mag=mag))
             model = Model(layer_config=self.layer_config.copy(), input_size=self.input_size)
             model.layers = l.copy()
+            output.append(model)
         return output
 
     def save(self):
@@ -81,6 +82,10 @@ class Model:
         open('{}/model.pickle'.format(DIR), 'x')
         file = open('{}/model.pickle'.format(DIR), 'wb')
         pickle.dump(self, file)
+        file.close()
+        open('{}/meta.txt'.format(DIR), 'x')
+        file = open('{}/meta.txt'.format(DIR), 'w')
+        file.write('score: {}'.format(self.score))
         file.close()
 
 
