@@ -257,5 +257,5 @@ while True:
                 home_button.active = False
                 play = False
 
-    clock.tick(160)  # frame-rate set to 40 fps
+    # clock.tick(160)  # frame-rate set to 40 fps
     pygame.display.update()  # graphics update

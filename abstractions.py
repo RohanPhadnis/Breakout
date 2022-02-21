@@ -5,6 +5,7 @@ import pickle
 import numpy
 import pygame
 from pygame.locals import *
+from PIL import Image
 
 
 def flatten(tensor):
@@ -17,21 +18,24 @@ def flatten(tensor):
 class Layer:
 
     def __init__(self, size, input_size):
-        self.weights = numpy.array([[random.choice([-1, 1]) * random.random() for _ in range(input_size)] for _ in range(size)])
-        self.biases = numpy.array([random.choice([-1, 1]) * random.random() for _ in range(size)])
-        self.output = numpy.array([0 for _ in range(size)])
+        self.weights = [[random.choice([-1, 1]) * random.random() for _ in range(input_size)] for _ in range(size)]
+        self.biases = [random.choice([-1, 1]) * random.random() for _ in range(size)]
+        self.output = [0 for _ in range(size)]
         self.size = size
         self.input_size = input_size
 
     def calculate(self, inputs):
         for n in range(self.size):
+            # print(n)
+            # print(len(self.weights[n]))
+            # print(len(inputs))
             self.output[n] = numpy.dot(self.weights[n], inputs) + self.biases[n]
         return self.output.copy()
 
     def mod_copy(self, mag=0):
         output = Layer(self.size, self.input_size)
-        output.weights = self.weights.copy().tolist()
-        output.biases = self.biases.copy().tolist()
+        output.weights = self.weights.copy()
+        output.biases = self.biases.copy()
         for x in range(self.size):
             for y in range(self.input_size):
                 output.weights[x][y] += mag * random.choice([-1, 1]) * random.random()
@@ -52,12 +56,13 @@ class Model:
             if n == 0:
                 self.layers.append(Layer(layer_config[0], input_size))
             else:
-                self.layers.append(Layer(layer_config, self.layers[n-1].size))
+                self.layers.append(Layer(layer_config[n], self.layers[n-1].size))
         self.score = 0
 
     def calculate(self, inputs):
+        output = inputs.copy()
         for n in range(self.size):
-            output = self.layers[n].calculate(inputs)
+            output = self.layers[n].calculate(output)
         return output.copy()
 
     def clone(self, mag=0, n=1):
@@ -137,7 +142,7 @@ class Paddle(Brick):
                 self.position[0] + self.dimensions[0] > self.window_size and self.velocity > 0):
             pass
         else:
-            self.position[0] += self.velocity * 1.5
+            self.position[0] += self.velocity * 5
 
 
 class Ball:
@@ -148,7 +153,7 @@ class Ball:
         self.position = [int(size // 2), 5 * self.radius]
         self.velocity = [0, 0]
         self.maximum_velocity = 0
-        self.gravity = 0.018
+        self.gravity = 0.09
         self.screen_size = size
         self.score = False
 
@@ -169,7 +174,7 @@ class Ball:
 
     # drift function to randomly manipulate the ball's x-velocity component
     def drift(self):
-        self.velocity[0] = random.randint(-10, 10) / 6
+        self.velocity[0] = random.randint(-10, 10)
 
     # detect_collision function
     # params (Brick): the surface parameter holds a Brick (or sub-Brick) object
@@ -180,12 +185,3 @@ class Ball:
                        self.position[1] - self.radius <= surface.position[1] + surface.dimensions[1] and
                        self.position[1] + self.radius >= surface.position[1])
 
-
-class Environment:
-
-    def __init__(self, model):
-        self.model = model
-        self.size = 720
-        self.surf = pygame.Surface((self.size, self.size))
-
-    # def compute
