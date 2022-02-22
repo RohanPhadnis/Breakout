@@ -1,12 +1,16 @@
 import threading
 from abstractions import *
 
+# todo: kinematic trajectory calculation
+# todo: common ball drift
+
 
 pygame.init()
 screen = pygame.display.set_mode((800, 800))
 pygame.display.set_caption('training')
 
 run = True
+drift = [random.random() * random.choice([-1, 1]) * 10 for _ in range(1000)]
 
 
 class Environment:
@@ -25,6 +29,7 @@ class Environment:
 
     def compute(self):
         counts = 0
+        bounces = 0
         while run and len(self.bricks) > 0 and self.ball.position[1] - self.ball.radius <= self.paddle.position[1] + self.paddle.dimensions[1]:
             counts += 1
 
@@ -37,7 +42,8 @@ class Environment:
             if self.ball.detect_collision(self.paddle):
                 self.model.score += 0.25 - abs(self.ball.position[0] - (self.paddle.position[0] + self.paddle.dimensions[0] / 2)) / self.size
                 self.ball.velocity[1] = -abs(self.ball.velocity[1])
-                self.ball.drift()
+                self.ball.velocity[0] = drift[bounces]
+                bounces += 1
                 if not self.ball.score:
                     self.ball.score = True
 
@@ -89,7 +95,6 @@ while run:
             pass
         if env.running:
             running = True
-    print(running)
     if not running:
         for env in envs:
             if env.model.score > max_score:
@@ -101,6 +106,7 @@ while run:
             model.save()
             models = model.clone(n=N, mag=MAG)
             envs = [Environment(models[n], n) for n in range(N)]
+        drift = [random.random() * random.choice([-1, 1]) * 10 for _ in range(1000)]
         print('time:', time.time() - start_time)
         print('iteration:', iteration)
         print('score:', max_score)
